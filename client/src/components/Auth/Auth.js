@@ -12,11 +12,14 @@ import useStyles from "./styles";
 import Input from "./Input";
 import { GoogleLogin } from "react-google-login";
 import Icon from "./Icon";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 export default function Auth() {
+  const navigate = useNavigate();
   const classes = useStyles();
   const [showPass, setShowPass] = useState(false);
-
+  const dispatch = useDispatch();
   const [isSignUp, setIsSignUp] = useState(false);
 
   const handleShowPassword = () =>
@@ -31,10 +34,22 @@ export default function Auth() {
     setShowPass(false);
   };
 
-  const googleSucces = () => {};
+  const googleSucces = async (res) => {
+    const result = res?.profileObj;
+    const token = res?.tokenId;
+
+    try {
+      dispatch({ type: "AUTH", data: { result, token } });
+      navigate ("/");
+
+      
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   const googleFailure = () => {
-      console.log("Google Sign In was unsuccessful. Try again later");
+    console.log("Google Sign In was unsuccessful. Try again later");
   };
 
   return (
@@ -85,8 +100,17 @@ export default function Auth() {
               />
             )}
           </Grid>
+          <Button
+            type="submit"
+            fullWidth
+            variant="contained"
+            color="primary"
+            className={classes.submit}
+          >
+            {isSignUp ? "Sign up" : "Log in"}
+          </Button>
           <GoogleLogin
-            clientId="GOOGLE ID"
+            clientId="916515487008-haks2csk0psqeuk5647jg84ejn0he88g.apps.googleusercontent.com"
             render={(renderProps) => (
               <Button
                 className={classes.googleButton}
@@ -104,16 +128,7 @@ export default function Auth() {
             onFailure={googleFailure}
             cookiePolicy="single_host_origin"
           />
-          <Button
-            type="submit"
-            fullWidth
-            variant="contained"
-            color="primary"
-            className={classes.submit}
-          >
-            {isSignUp ? "Sign up" : "Log in"}
-          </Button>
-          <Grid container justify="flex-end">
+          <Grid container justifyContent="flex-end">
             <Grid item>
               <Button onClick={switchMode}>
                 {isSignUp
